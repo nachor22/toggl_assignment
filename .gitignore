@@ -3,3 +3,4 @@ melodic-gamma-315118-027a33225e4a.json
 .terraform
 terraform.tfstate
 terraform.tfstate.backup
+.env_rc
