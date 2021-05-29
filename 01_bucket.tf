@@ -1,15 +1,25 @@
-resource "google_storage_bucket" "static_content" {
-  name        = "static_content"
+resource "google_storage_bucket" "toggl_test_static_content" {
+  name        = "toggl_test_static_content"
 }
 
 resource "google_storage_bucket_object" "index" {
-  name   = "intex.html"
+  name   = "index.html"
   source = "public/index.html"
-  bucket = "static_content"
+  bucket = google_storage_bucket.toggl_test_static_content.name
 }
 
 resource "google_storage_bucket_object" "main" {
   name   = "main.js"
   source = "public/main.js"
-  bucket = "static_content"
+  bucket = google_storage_bucket.toggl_test_static_content.name
+}
+
+resource "google_storage_bucket_access_control" "public_rule" {
+  bucket = google_storage_bucket.toggl_test_static_content.name
+  role   = "READER"
+  entity = "allUsers"
+}
+
+output "bucket_domain" {
+  value = google_storage_bucket_object.index.media_link
 }
