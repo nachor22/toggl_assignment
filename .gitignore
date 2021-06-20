@@ -1,4 +1,4 @@
-melodic-gamma-315118-027a33225e4a.json
+*.json
 .terraform.lock.hcl
 .terraform
 terraform.tfstate
