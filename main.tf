@@ -1,5 +1,21 @@
+variable "project" {
+  description = "Project id"
+}
+
+variable "region" {
+  default = "us-central1"
+}
+
+variable "zone" {
+  default = "us-central1-a"
+}
+
+variable "zone_consul" {
+  default = "us-east1-b"
+}
+
 provider "google" {
-  project     = "melodic-gamma-315118"
-  region      = "us-central1"
-  zone        = "us-central1-a"
+  project     = var.project
+  region      = var.region
+  zone        = var.zone
 }
