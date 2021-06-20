@@ -1,0 +1,45 @@
+#cloud-config
+package_update: true
+packages:
+  - docker.io
+  - docker-compose
+  - unzip
+runcmd:
+  - mkdir /opt/data
+write_files:
+  - path: /opt/docker-compose.yaml
+    content: |
+      version: "3"
+      services:
+        postgres:
+          image: postgres:9.6-alpine
+          environment:
+            - POSTGRES_USER=toggl_user
+            - POSTGRES_PASSWORD=unsafepass
+            - POSTGRES_DB=toggl
+          ports:
+            - 5432:5432
+          volumes:
+            - "./data:/var/lib/postgresql/data"
+  - path: /etc/consul.d/postgres.json
+    content: |
+      {
+        "service": {
+          "name": "postgres",
+          "port": 5432,
+          "check": {
+            "id": "postgres",
+            "name": "Postgres TCP on port 5432",
+            "tcp": "localhost:5432",
+            "interval": "10s",
+            "timeout": "1s"
+          }
+        }
+      }
+runcmd:
+  - docker-compose -f /opt/docker-compose.yaml up -d
+  - wget https://releases.hashicorp.com/consul/1.9.6/consul_1.9.6_linux_amd64.zip &&
+    unzip consul_1.9.6_linux_amd64.zip &&
+    mv consul /usr/bin &&
+    mkdir -p /opt/consul_data &&
+    consul agent -enable-local-script-checks=true -data-dir=/consul_data -retry-join "provider=gce  tag_value=consul-node" -bind '{{ GetInterfaceIP "ens4" }}' -config-dir=/etc/consul.d

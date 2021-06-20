@@ -1,0 +1,47 @@
+#cloud-config
+package_update: true
+packages:
+  - docker.io
+  - docker-compose
+  - unzip
+write_files:
+  - path: /opt/docker-compose.yaml
+    content: |
+      version: "3"
+      services:
+        api:
+          image: nachor22/toggl_api
+          volumes:
+            - "./config.json:/opt/config.json"
+          command: api --config-file /opt/config.json
+          ports:
+            - 80:80   
+          restart: unless-stopped
+  - path: /opt/config.json
+    content: |
+      {
+        "http_port": 80,
+        "db_connstring": "host=${db_ip} user=toggl_user password=unsafepass sslmode=disable database=toggl"
+      }
+  - path: /etc/consul.d/api.json
+    content: |
+      {
+        "service": {
+          "name": "api",
+          "port": 80,
+          "check": {
+            "id": "api",
+            "name": "api http on port 80",
+            "http": "http://localhost/api/status",
+            "interval": "10s",
+            "timeout": "1s"
+          }
+        }
+      }
+runcmd:
+  - docker-compose -f /opt/docker-compose.yaml up -d
+  - wget https://releases.hashicorp.com/consul/1.9.6/consul_1.9.6_linux_amd64.zip &&
+    unzip consul_1.9.6_linux_amd64.zip &&
+    mv consul /usr/bin &&
+    mkdir -p /opt/consul_data &&
+    consul agent -enable-local-script-checks=true -data-dir=/consul_data -retry-join "provider=gce  tag_value=consul-node" -bind '{{ GetInterfaceIP "ens4" }}' -config-dir=/etc/consul.d

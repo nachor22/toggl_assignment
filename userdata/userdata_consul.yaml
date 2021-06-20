@@ -1,0 +1,10 @@
+#cloud-config
+package_update: true
+packages:
+  - unzip
+runcmd:
+  - wget https://releases.hashicorp.com/consul/1.9.6/consul_1.9.6_linux_amd64.zip &&
+   unzip consul_1.9.6_linux_amd64.zip &&
+   mv consul /usr/bin &&
+   mkdir -p /opt/consul_data &&
+   consul agent -server -bootstrap-expect=3 -data-dir=/opt/consul_data -ui -client 0.0.0.0 -retry-join "provider=gce  tag_value=consul-node"
