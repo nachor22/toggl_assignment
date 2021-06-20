@@ -1,3 +1,4 @@
+#enable GCP apis
 resource "google_project_service" "crm" {
   service = "cloudresourcemanager.googleapis.com"
   disable_on_destroy = false
