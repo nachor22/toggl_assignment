@@ -1,5 +1,13 @@
 #api server with autoscaler
 #userdata used to deploy app and register in consul
+data "template_file" "ud-api" {
+  template = file("userdata/userdata_api.yaml")
+  #db host IP
+  vars = {
+    db_ip = google_compute_instance.db.network_interface.0.network_ip
+  }
+}
+
 resource "google_compute_instance_template" "apiserver" {
   machine_type = "e2-small"
 
