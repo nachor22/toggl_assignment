@@ -1,10 +1,7 @@
-# toggl_assignment
-## Toggl SRE Home Assignment
+# Toggl SRE Home Assignment
+Provision and configure required infrastructure in GCP.
 
-
-Doc
-
-## Reqs
+### Reqs
 In order to execute this provisioning, you need to:
 - Create GCP clean project
 - Create service account, with at least roles: `Editor` and `IAM Security Admin`
@@ -22,27 +19,43 @@ Environment variables expected to be set:
 - Run `terraform apply`
 - When you are done `terraform destroy`
 
-##Outputs
+### Outputs
 - Load Balancer IP
 - Nameservers to point your DNS Zone.
 
-##API
+## Components description
+#### Instances
+Installation, configuration, etc inside the instances is done using user-data at launch. 
+
+#### API
 The app is deployed using Docker.
-Docker image was built (see `data/Dockerfile`) and pushed to `https://hub.docker.com/layers/nachor22/toggl_api/`
+Docker image was built (see `data/Dockerfile`) and pushed to `https://hub.docker.com/r/nachor22/toggl_api/`
+Autoscale is configured based on CPU utilization.
 
-##GCP Region & Zone
-defaults and separated because quota
+#### GCP Region & Zone
+Region `us-central1` and zone `us-central1` are used by default to create resources.
+Beacuse of the `IN_USE_ADDRESS` quota that limits to 4 IPs, the consul cluster is created in zone `us-east1-b`
 
-##DB
-docker
+#### DB
+Postgres 9.6 deployed using Docker.
+Creates DB, user and pass for api
 
-##Load Balancer
-routes
+#### Load Balancer
+Accesible via IP (terraform output) or domain (toggl_test.example.com)
+- Static content served from bucket
+- `/` redirects to `/index.html`
+- `/api/*` routed to API servers
+- `/ui/` routed to Consul UI
 
-##Consul servers
-autojoin
+#### Consul servers
+Consul cluster with 3 servers.
+DB and API instances run client agents and register services with healthchecks.
+Members join the cluster using Cloud Auto-Join
 
-###DNS
+#### DNS
 Creates toggl_test.\{dns_zone\} record, pointing to the Load Balancer IP.
 Set `TF_VAR_dns_zone` and point NS of your zone to the shown in outputs.
 By default `toggl_test.nachor22.tk`
+
+## Note
+Many decisions or configurations where made considering this is a test and in order to keep it simple.
