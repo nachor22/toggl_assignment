@@ -21,40 +21,41 @@ Environment variables expected to be set:
 
 ### Outputs
 - Load Balancer IP
-- Nameservers to point your DNS Zone.
+- Nameservers to point your DNS Zone
 
 ## Components description
 #### Instances
 Installation, configuration, etc inside the instances is done using user-data at launch. 
 
 #### API
-The app is deployed using Docker.
-Docker image was built (see `data/Dockerfile`) and pushed to `https://hub.docker.com/r/nachor22/toggl_api/`
+The app is deployed using Docker.\
+Docker image was built (see `data/Dockerfile`) and pushed to `https://hub.docker.com/r/nachor22/toggl_api/`\
 Autoscale is configured based on CPU utilization.
 
-#### GCP Region & Zone
-Region `us-central1` and zone `us-central1` are used by default to create resources.
-Beacuse of the `IN_USE_ADDRESS` quota that limits to 4 IPs, the consul cluster is created in zone `us-east1-b`
+#### GCP
+Region `us-central1` and zone `us-central1` are used by default to create resources.\
+Beacuse of the `IN_USE_ADDRESS` quota that limits to 4 IPs, the consul cluster is created in zone `us-east1-b`\
+GCP apis `cloudresourcemanager.googleapis.com` `iam.googleapis.com` `compute.googleapis.com` `dns.googleapis.com` are required to be enabled. Since it's an async action, it may fail the first time. You can enable them manually.
 
 #### DB
-Postgres 9.6 deployed using Docker.
-Creates DB, user and pass for api
+Postgres 9.6 deployed using Docker.\
+Creates DB, user and pass for api.
 
 #### Load Balancer
-Accesible via IP (terraform output) or domain (toggl_test.example.com)
+Accesible via IP (terraform output) or domain (toggl_test.example.com)\
 - Static content served from bucket
 - `/` redirects to `/index.html`
 - `/api/*` routed to API servers
 - `/ui/` routed to Consul UI
 
 #### Consul servers
-Consul cluster with 3 servers.
-DB and API instances run client agents and register services with healthchecks.
+Consul cluster with 3 servers.\
+DB and API instances run client agents and register services with healthchecks.\
 Members join the cluster using Cloud Auto-Join
 
 #### DNS
-Creates toggl_test.\{dns_zone\} record, pointing to the Load Balancer IP.
-Set `TF_VAR_dns_zone` and point NS of your zone to the shown in outputs.
+Creates toggl_test.\{dns_zone\} record, pointing to the Load Balancer IP.\
+Set `TF_VAR_dns_zone` and point your zone NS to the shown in outputs.\
 By default `toggl_test.nachor22.tk`
 
 ## Note
