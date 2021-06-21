@@ -5,6 +5,7 @@ data "template_file" "ud-api" {
   #db host IP
   vars = {
     db_ip = google_compute_instance.db.network_interface.0.network_ip
+    db_pass = random_password.db_pass.result
   }
 }
 

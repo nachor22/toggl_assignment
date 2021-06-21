@@ -21,7 +21,7 @@ write_files:
     content: |
       {
         "http_port": 80,
-        "db_connstring": "host=${db_ip} user=toggl_user password=unsafepass sslmode=disable database=toggl"
+        "db_connstring": "host=${db_ip} user=toggl_user password=${db_pass} sslmode=disable database=toggl"
       }
   - path: /etc/consul.d/api.json
     content: |

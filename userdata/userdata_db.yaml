@@ -15,7 +15,7 @@ write_files:
           image: postgres:9.6-alpine
           environment:
             - POSTGRES_USER=toggl_user
-            - POSTGRES_PASSWORD=unsafepass
+            - POSTGRES_PASSWORD=${db_pass}
             - POSTGRES_DB=toggl
           ports:
             - 5432:5432
